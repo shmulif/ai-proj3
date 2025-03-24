@@ -209,11 +209,9 @@ class KMeansClusterer:
         self.clusters = [None for _ in range(len(self.data))]
 
         still_changing = True
-        iteration_count = 0
-        while still_changing and iteration_count < self.iter:
+        while still_changing:
             still_changing = self.assignNewClusters()  # Assign points and check for changes
             self.computeNewCentroids()                # Move centroids to the mean of their clusters
-            iteration_count += 1
 
         # Final evaluation
         wcss = self.getWCSS()
