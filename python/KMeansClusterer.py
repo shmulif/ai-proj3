@@ -202,20 +202,34 @@ class KMeansClusterer:
         If self.iter > 1, choose the clustering that minimizes the WCSS measure.
         If kMin < kMax, select the k maximizing the gap statistic using 100 uniform samples uniformly across given data ranges.
         """
-        # Choose k centroids using Forgy initialization (random sample from data)
-        self.centroids = random.sample(self.data, self.k)
+        old_wcss = float('inf')
 
-        # Initialize cluster assignments
-        self.clusters = [None for _ in range(len(self.data))]
+        for i in range(self.iter):
+            # Choose k centroids using Forgy initialization (random sample from data)
+            self.centroids = random.sample(self.data, self.k)
 
-        still_changing = True
-        while still_changing:
-            still_changing = self.assignNewClusters()  # Assign points and check for changes
-            self.computeNewCentroids()                # Move centroids to the mean of their clusters
+            # Initialize cluster assignments
+            self.clusters = [None for _ in range(len(self.data))]
 
-        # Final evaluation
-        wcss = self.getWCSS()
-        return self.clusters, wcss
+            still_changing = True
+            while still_changing:
+                still_changing = self.assignNewClusters()  # Assign points and check for changes
+                self.computeNewCentroids()                # Move centroids to the mean of their clusters
+
+
+            # wcss comparison
+            print(i)
+            new_wcss = self.getWCSS()
+            if new_wcss < old_wcss:
+                print(f'new_wcss({new_wcss}) is less than old_wcss({old_wcss})')
+                best_clusters = self.clusters
+                old_wcss = new_wcss
+            else:
+                print(f'new_wcss({new_wcss}), old_wcss({old_wcss})')
+            print()
+
+        self.clusters = best_clusters
+        print(f'final wcss: {self.getWCSS()}')
 
     def writeClusterData(self, filename):
         """Export cluster data in the given data output format to the file provided.
