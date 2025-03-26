@@ -176,8 +176,9 @@ class KMeansClusterer:
         self.clusters = new_clusters
         return changed
 
-    def computeNewCentroids(self, k, data, dim):
+    def computeNewCentroids(self, k, data):
         """Compute new centroids at the mean point of each cluster of points."""
+        dim = len(data[0])
         # Initialize lists to hold sums and counts
         sums = [[0.0] * dim for _ in range(k)]
         counts = [0] * k
@@ -203,10 +204,10 @@ class KMeansClusterer:
         If self.iter > 1, choose the clustering that minimizes the WCSS measure.
         If kMin < kMax, select the k maximizing the gap statistic using 100 uniform samples uniformly across given data ranges.
         """
-        self.runKmeansSingleK(self.k, self.data, self.dim)
-        # dim = len(data[0])
+        self.runKmeansSingleK(self.k, self.data)
 
-    def runKmeansSingleK(self, k, data, dim):
+    def runKmeansSingleK(self, k, data):
+
         old_wcss = float('inf')
 
         for i in range(self.iter):
@@ -219,7 +220,7 @@ class KMeansClusterer:
             still_changing = True
             while still_changing:
                 still_changing = self.assignNewClusters(data)  # Assign points and check for changes
-                self.computeNewCentroids(k, data, dim)                # Move centroids to the mean of their clusters
+                self.computeNewCentroids(k, data)                # Move centroids to the mean of their clusters
 
 
             # wcss comparison
