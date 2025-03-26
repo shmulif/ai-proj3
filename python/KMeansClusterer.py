@@ -225,10 +225,10 @@ class KMeansClusterer:
 
     def computeSampleData(self, minimums, maximums, dimensions, numPoints):
         dataSet = []
-        for i in range(numPoints):
+        for point_index in range(numPoints):
             currentPoint = []
-            for i in range(dimensions):
-                currentPoint.append(random.uniform(minimums[i], maximums[i] + 1))
+            for dim_index in range(dimensions):
+                currentPoint.append(random.uniform(minimums[dim_index], maximums[dim_index] + 1))
             dataSet.append(currentPoint)
         return dataSet
 
