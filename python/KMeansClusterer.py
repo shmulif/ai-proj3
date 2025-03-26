@@ -199,8 +199,15 @@ class KMeansClusterer:
                 mean = [s / counts[i] for s in sums[i]]
                 self.centroids.append(mean)
 
-    def computeSampleData(self):
-        pass
+    def computeSampleData(self, minimum, maximum, dimensions, numPoints):
+        dataSet = []
+        for i in range(numPoints):
+            currentPoint = []
+            for i in range(dimensions):
+                currentPoint.append(random.randint(minimum, maximum + 1))
+            dataSet.append[currentPoint]
+        return dataSet
+
 
     def kMeansCluster(self):
         """Perform k-means clustering with Forgy initialization and return the 0-based cluster assignments for corresponding data points.
