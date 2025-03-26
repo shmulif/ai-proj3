@@ -1,7 +1,7 @@
 import sys
 import random
 import traceback
-from math import sqrt
+import math
 import copy
 
 """
@@ -137,7 +137,7 @@ class KMeansClusterer:
             diff = p1[i] - p2[i]
             sumOfSquareDiffs += (diff * diff)
         
-        return sqrt(sumOfSquareDiffs)
+        return math.sqrt(sumOfSquareDiffs)
 
     def getWCSS(self):
         """Return the minimum Within-Clusters Sum-of-Squares measure for the chosen k number of clusters.
@@ -199,29 +199,77 @@ class KMeansClusterer:
                 mean = [s / counts[i] for s in sums[i]]
                 self.centroids.append(mean)
 
+    def computeSampleData(self):
+        pass
+
     def kMeansCluster(self):
         """Perform k-means clustering with Forgy initialization and return the 0-based cluster assignments for corresponding data points.
         If self.iter > 1, choose the clustering that minimizes the WCSS measure.
         If kMin < kMax, select the k maximizing the gap statistic using 100 uniform samples uniformly across given data ranges.
         """
-        self.runKmeansSingleK(self.k, self.data)
+        gapK = float('-inf')
+        bestK = self.k
+        bestClusters = self.clusters
+        bestCentroids = self.centroids
+        print(f"self.clusters: {self.clusters}")
+        print(f"self.centroids: {self.centroids}")
+        print()
+        print("Enering the loop")
+        print()
+        # When one k is given then kMin = kMax = k and this loop will run one k means algorithm and break
+        for k in range(self.kMin, self.kMax+1, 1):
 
-    def runKmeansSingleK(self, k, data):
+            self.kMeansSingleK(k, self.data)
+
+            print(f"self.clusters: {self.clusters}")
+            print(f"self.centroids: {self.centroids}")
+            print()
+
+            if self.kMin == self.kMax: # If there is only one k, then it will be the best k
+                print("Exiting the loop")
+                print()
+                break
+
+            logMinWCSS = math.log(self.getWCSS())
+            associatedClusters = copy.deepcopy(self.clusters)
+            associatedCentroids = copy.deepcopy(self.centroids)
+
+            totalLogRandWCSS = 0
+            for i in range(100):
+                data = self.computeSampleData()
+                self.kMeansOneIter(k, data)
+                totalLogRandWCSS += math.log(self.getWCSS())
+
+            avgRandWCSS = totalLogRandWCSS / 100
+            newGapK = avgRandWCSS - logMinWCSS
+
+            if gapK < newGapK:
+                gapK = newGapK
+                bestK = k
+                bestClusters = associatedClusters
+                bestCentroids = associatedCentroids
+
+        print(f"self.clusters: {self.clusters}")
+        print(f"self.centroids: {self.centroids}")
+        print()
+
+        self.k = bestK
+        self.clusters = bestClusters
+        self.centroids = bestCentroids
+
+        print(f"self.clusters: {self.clusters}")
+        print(f"self.centroids: {self.centroids}")
+        print()
+            
+
+
+    def kMeansSingleK(self, k, data):
 
         old_wcss = float('inf')
 
         for i in range(self.iter):
-            # Choose k centroids using Forgy initialization (random sample from data)
-            self.centroids = random.sample(data, k)
-
-            # Initialize cluster assignments
-            self.clusters = [None for _ in range(len(data))]
-
-            still_changing = True
-            while still_changing:
-                still_changing = self.assignNewClusters(data)  # Assign points and check for changes
-                self.computeNewCentroids(k, data)                # Move centroids to the mean of their clusters
-
+            
+            self.kMeansOneIter(k, data)
 
             # wcss comparison
             new_wcss = self.getWCSS()
@@ -232,6 +280,19 @@ class KMeansClusterer:
 
         self.clusters = best_clusters
         self.centroids = best_centroids
+
+
+    def kMeansOneIter(self, k ,data):
+        # Choose k centroids using Forgy initialization (random sample from data)
+        self.centroids = random.sample(data, k)
+
+        # Initialize cluster assignments
+        self.clusters = [None for _ in range(len(data))]
+
+        still_changing = True
+        while still_changing:
+            still_changing = self.assignNewClusters(data)  # Assign points and check for changes
+            self.computeNewCentroids(k, data)                # Move centroids to the mean of their clusters
 
     def writeClusterData(self, filename):
         """Export cluster data in the given data output format to the file provided.
