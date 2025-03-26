@@ -228,7 +228,7 @@ class KMeansClusterer:
         for point_index in range(numPoints):
             currentPoint = []
             for dim_index in range(dimensions):
-                currentPoint.append(random.uniform(minimums[dim_index], maximums[dim_index] + 1))
+                currentPoint.append(random.uniform(minimums[dim_index], maximums[dim_index]))
             dataSet.append(currentPoint)
         return dataSet
 
@@ -261,11 +261,16 @@ class KMeansClusterer:
 
                 self.kMeansSingleK(k, self.data)
 
-                logMinWCSS = math.log(self.getWCSS())
+                real_wcss = self.getWCSS()
+                
+                if real_wcss <= 0:
+                    print(f"k={k}, WCSS is zero or negative — skipping")
+                    continue
+
+                logMinWCSS = math.log(real_wcss)
                 associatedClusters = copy.deepcopy(self.clusters)
                 associatedCentroids = copy.deepcopy(self.centroids)
 
-                wcss = self.getWCSS()
 
                 totalLogRandWCSS = 0
                 for i in range(100):
