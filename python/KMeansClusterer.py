@@ -152,7 +152,7 @@ class KMeansClusterer:
             wcss += dist * dist
         return wcss
 
-    def assignNewClusters(self) -> bool:
+    def assignNewClusters(self, data) -> bool:
         """Assign each data point to the nearest centroid and return whether or not any cluster assignments changed.
 
         Returns: Whether or not any cluster assignments changed (bool)
@@ -160,7 +160,7 @@ class KMeansClusterer:
         changed = False
         new_clusters = []
 
-        for point in self.data:
+        for point in data:
             # Compute distance to each centroid
             distances = [self.getDistance(point, centroid) for centroid in self.centroids]
             # Find the index of the closest centroid
@@ -168,32 +168,32 @@ class KMeansClusterer:
             new_clusters.append(closest_cluster)
 
         # Check for changes
-        for i in range(len(self.data)):
-            if self.clusters[i] != new_clusters[i]:
+        for i in range(len(data)):
+            if self.clusters[i] != new_clusters[i]: # Note: self.clusters[i] may initially be None; comparison still works safely
                 changed = True
                 break  # Stop early if any assignment changed
 
         self.clusters = new_clusters
         return changed
 
-    def computeNewCentroids(self):
+    def computeNewCentroids(self, k, data, dim):
         """Compute new centroids at the mean point of each cluster of points."""
         # Initialize lists to hold sums and counts
-        sums = [[0.0] * self.dim for _ in range(self.k)]
-        counts = [0] * self.k
+        sums = [[0.0] * dim for _ in range(k)]
+        counts = [0] * k
 
         # Sum up coordinates for each cluster
         for i, cluster_id in enumerate(self.clusters):
-            for d in range(self.dim):
-                sums[cluster_id][d] += self.data[i][d]
+            for d in range(dim):
+                sums[cluster_id][d] += data[i][d]
             counts[cluster_id] += 1
 
         # Calculate mean for each cluster
         self.centroids = []
-        for i in range(self.k):
+        for i in range(k):
             if counts[i] == 0:
                 # Handle empty cluster — reinitialize randomly
-                self.centroids.append(random.choice(self.data))
+                self.centroids.append(random.choice(data))
             else:
                 mean = [s / counts[i] for s in sums[i]]
                 self.centroids.append(mean)
@@ -203,19 +203,23 @@ class KMeansClusterer:
         If self.iter > 1, choose the clustering that minimizes the WCSS measure.
         If kMin < kMax, select the k maximizing the gap statistic using 100 uniform samples uniformly across given data ranges.
         """
+        self.runKmeansSingleK(self.k, self.data, self.dim)
+        # dim = len(data[0])
+
+    def runKmeansSingleK(self, k, data, dim):
         old_wcss = float('inf')
 
         for i in range(self.iter):
             # Choose k centroids using Forgy initialization (random sample from data)
-            self.centroids = random.sample(self.data, self.k)
+            self.centroids = random.sample(data, k)
 
             # Initialize cluster assignments
-            self.clusters = [None for _ in range(len(self.data))]
+            self.clusters = [None for _ in range(len(data))]
 
             still_changing = True
             while still_changing:
-                still_changing = self.assignNewClusters()  # Assign points and check for changes
-                self.computeNewCentroids()                # Move centroids to the mean of their clusters
+                still_changing = self.assignNewClusters(data)  # Assign points and check for changes
+                self.computeNewCentroids(k, data, dim)                # Move centroids to the mean of their clusters
 
 
             # wcss comparison
