@@ -207,59 +207,44 @@ class KMeansClusterer:
         If self.iter > 1, choose the clustering that minimizes the WCSS measure.
         If kMin < kMax, select the k maximizing the gap statistic using 100 uniform samples uniformly across given data ranges.
         """
-        gapK = float('-inf')
-        bestK = self.k
-        bestClusters = self.clusters
-        bestCentroids = self.centroids
-        print(f"self.clusters: {self.clusters}")
-        print(f"self.centroids: {self.centroids}")
-        print()
-        print("Enering the loop")
-        print()
-        # When one k is given then kMin = kMax = k and this loop will run one k means algorithm and break
-        for k in range(self.kMin, self.kMax+1, 1):
 
-            self.kMeansSingleK(k, self.data)
+        if self.kMin == self.kMax: # If there is only one k provided
 
-            print(f"self.clusters: {self.clusters}")
-            print(f"self.centroids: {self.centroids}")
-            print()
+            self.kMeansSingleK(self.kMin, self.data)
 
-            if self.kMin == self.kMax: # If there is only one k, then it will be the best k
-                print("Exiting the loop")
-                print()
-                break
+        else:
 
-            logMinWCSS = math.log(self.getWCSS())
-            associatedClusters = copy.deepcopy(self.clusters)
-            associatedCentroids = copy.deepcopy(self.centroids)
+            gapK = float('-inf')
+            bestK = None
+            bestClusters = None
+            bestCentroids = None
+            
+            for k in range(self.kMin, self.kMax+1, 1):
 
-            totalLogRandWCSS = 0
-            for i in range(100):
-                data = self.computeSampleData()
-                self.kMeansOneIter(k, data)
-                totalLogRandWCSS += math.log(self.getWCSS())
+                self.kMeansSingleK(k, self.data)
 
-            avgRandWCSS = totalLogRandWCSS / 100
-            newGapK = avgRandWCSS - logMinWCSS
+                logMinWCSS = math.log(self.getWCSS())
+                associatedClusters = copy.deepcopy(self.clusters)
+                associatedCentroids = copy.deepcopy(self.centroids)
 
-            if gapK < newGapK:
-                gapK = newGapK
-                bestK = k
-                bestClusters = associatedClusters
-                bestCentroids = associatedCentroids
+                totalLogRandWCSS = 0
+                for i in range(100):
+                    data = self.computeSampleData()
+                    self.kMeansOneIter(k, data)
+                    totalLogRandWCSS += math.log(self.getWCSS())
 
-        print(f"self.clusters: {self.clusters}")
-        print(f"self.centroids: {self.centroids}")
-        print()
+                avgRandWCSS = totalLogRandWCSS / 100
+                newGapK = avgRandWCSS - logMinWCSS
 
-        self.k = bestK
-        self.clusters = bestClusters
-        self.centroids = bestCentroids
+                if gapK < newGapK:
+                    gapK = newGapK
+                    bestK = k
+                    bestClusters = associatedClusters
+                    bestCentroids = associatedCentroids
 
-        print(f"self.clusters: {self.clusters}")
-        print(f"self.centroids: {self.centroids}")
-        print()
+            self.k = bestK
+            self.clusters = bestClusters
+            self.centroids = bestCentroids
             
 
 
