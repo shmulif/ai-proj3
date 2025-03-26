@@ -257,13 +257,15 @@ class KMeansClusterer:
             for k in range(self.kMin, self.kMax+1, 1):
 
                 # I like to uncomment this so I can see that the algorithm is running
-                # print(f"k: {k}")
+                print(f"k: {k}")
 
                 self.kMeansSingleK(k, self.data)
 
                 logMinWCSS = math.log(self.getWCSS())
                 associatedClusters = copy.deepcopy(self.clusters)
                 associatedCentroids = copy.deepcopy(self.centroids)
+
+                wcss = self.getWCSS()
 
                 totalLogRandWCSS = 0
                 for i in range(100):
@@ -281,6 +283,10 @@ class KMeansClusterer:
                     bestK = k
                     bestClusters = associatedClusters
                     bestCentroids = associatedCentroids
+                
+                print(f"k={k}, real log(WCSS)={logMinWCSS:.3f}, avg random log(WCSS)={avgRandWCSS:.3f}, gap={newGapK:.3f}")
+                print()
+
 
             self.k = bestK
             self.clusters = bestClusters
