@@ -122,6 +122,30 @@ class KMeansClusterer:
         Returns: A parallel list of cluster assignments
         """
         return self.clusters
+    
+    def getDataMinimums(self):
+        num_dimensions = len(self.data[0])
+        minimums = [float('inf')] * num_dimensions
+
+        for row in self.data:
+            for i in range(num_dimensions):
+                if row[i] < minimums[i]:
+                    minimums[i] = row[i]
+
+        return minimums
+
+
+    def getDataMaximums(self):
+        num_dimensions = len(self.data[0])
+        maximums = [float('-inf')] * num_dimensions
+
+        for row in self.data:
+            for i in range(num_dimensions):
+                if row[i] > maximums[i]:
+                    maximums[i] = row[i]
+
+        return maximums
+    
 
     def getDistance(self, p1, p2):
         """Return the Euclidean distance between the two given point vectors.
@@ -199,13 +223,13 @@ class KMeansClusterer:
                 mean = [s / counts[i] for s in sums[i]]
                 self.centroids.append(mean)
 
-    def computeSampleData(self, minimum, maximum, dimensions, numPoints):
+    def computeSampleData(self, minimums, maximums, dimensions, numPoints):
         dataSet = []
         for i in range(numPoints):
             currentPoint = []
             for i in range(dimensions):
-                currentPoint.append(random.randint(minimum, maximum + 1))
-            dataSet.append[currentPoint]
+                currentPoint.append(random.uniform(minimums[i], maximums[i] + 1))
+            dataSet.append(currentPoint)
         return dataSet
 
     def kMeansCluster(self):
@@ -213,7 +237,6 @@ class KMeansClusterer:
         If self.iter > 1, choose the clustering that minimizes the WCSS measure.
         If kMin < kMax, select the k maximizing the gap statistic using 100 uniform samples uniformly across given data ranges.
         """
-
         if self.kMin == self.kMax: # If there is only one k provided
 
             self.kMeansSingleK(self.kMin, self.data)
@@ -224,8 +247,17 @@ class KMeansClusterer:
             bestK = None
             bestClusters = None
             bestCentroids = None
+
+            # Data info
+            minimums = self.getDataMinimums()
+            maximums = self.getDataMaximums()
+            dimensions = self.dim
+            numPoints = len(self.data)
             
             for k in range(self.kMin, self.kMax+1, 1):
+
+                # I like to uncomment this so I can see that the algorithm is running
+                # print(f"k: {k}")
 
                 self.kMeansSingleK(k, self.data)
 
@@ -235,7 +267,9 @@ class KMeansClusterer:
 
                 totalLogRandWCSS = 0
                 for i in range(100):
-                    data = self.computeSampleData()
+                    # I like to uncomment this so I can see that the algorithm is running
+                    # print(f"    i: {i}")
+                    data = self.computeSampleData(minimums, maximums, dimensions, numPoints)
                     self.kMeansOneIter(k, data)
                     totalLogRandWCSS += math.log(self.getWCSS())
 
