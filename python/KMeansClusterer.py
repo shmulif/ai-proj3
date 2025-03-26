@@ -2,6 +2,7 @@ import sys
 import random
 import traceback
 from math import sqrt
+import copy
 
 """
 KMeansClusterer.py - an interface for the Model AI Assignments k-Means Clustering exercises, based on the Java class written by Todd Neller
@@ -218,18 +219,14 @@ class KMeansClusterer:
 
 
             # wcss comparison
-            print(i)
             new_wcss = self.getWCSS()
             if new_wcss < old_wcss:
-                print(f'new_wcss({new_wcss}) is less than old_wcss({old_wcss})')
-                best_clusters = self.clusters
+                best_clusters = copy.deepcopy(self.clusters)
+                best_centroids = copy.deepcopy(self.centroids)
                 old_wcss = new_wcss
-            else:
-                print(f'new_wcss({new_wcss}), old_wcss({old_wcss})')
-            print()
 
         self.clusters = best_clusters
-        print(f'final wcss: {self.getWCSS()}')
+        self.centroids = best_centroids
 
     def writeClusterData(self, filename):
         """Export cluster data in the given data output format to the file provided.
