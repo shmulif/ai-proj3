@@ -256,15 +256,14 @@ class KMeansClusterer:
             
             for k in range(self.kMin, self.kMax+1, 1):
 
-                # I like to uncomment this so I can see that the algorithm is running
-                print(f"k: {k}")
+                # print(f"k: {k}")
 
                 self.kMeansSingleK(k, self.data)
 
                 real_wcss = self.getWCSS()
                 
                 if real_wcss <= 0:
-                    print(f"k={k}, WCSS is zero or negative — skipping")
+                    # print(f"k={k}, WCSS is zero or negative — skipping")
                     continue
 
                 logMinWCSS = math.log(real_wcss)
@@ -274,8 +273,6 @@ class KMeansClusterer:
 
                 totalLogRandWCSS = 0
                 for i in range(100):
-                    # I like to uncomment this so I can see that the algorithm is running
-                    # print(f"    i: {i}")
                     data = self.computeSampleData(minimums, maximums, dimensions, numPoints)
                     self.kMeansOneIter(k, data)
                     totalLogRandWCSS += math.log(self.getWCSS())
@@ -289,8 +286,8 @@ class KMeansClusterer:
                     bestClusters = associatedClusters
                     bestCentroids = associatedCentroids
                 
-                print(f"k={k}, real log(WCSS)={logMinWCSS:.3f}, avg random log(WCSS)={avgRandWCSS:.3f}, gap={newGapK:.3f}")
-                print()
+                # print(f"k={k}, real log(WCSS)={logMinWCSS:.3f}, avg random log(WCSS)={avgRandWCSS:.3f}, gap={newGapK:.3f}")
+                # print()
 
 
             self.k = bestK
